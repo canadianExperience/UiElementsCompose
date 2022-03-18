@@ -12,7 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -46,41 +46,70 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyApp(context: Context) {
-
-    Column(modifier = Modifier.padding(16.dp)) {
-        PhotographerCard(context)
-        MyButton(context)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Hi there!")
+                },
+                actions = {
+                    IconButton(onClick = { /* doSomething() */ }) {
+                        Row() {
+                            Icon(
+                                Icons.Filled.Favorite,
+                                contentDescription = "Favorite",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                            Icon(
+                                Icons.Filled.Delete,
+                                contentDescription = "Delete",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                            Icon(
+                                Icons.Filled.Search,
+                                contentDescription = "Search",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        BodyContent(Modifier.padding(innerPadding), context)
     }
-
 }
 
 @Composable
-fun PhotographerCard(context: Context) {
-    Card(modifier = Modifier
-        .clip(RoundedCornerShape(4.dp))
+fun PhotographerCard(modifier: Modifier = Modifier, context: Context) {
+    Card(modifier = modifier
+        .padding(16.dp)
+        .clip(RoundedCornerShape(10.dp))
         .clickable(onClick = {
-            Toast.makeText(context, "Card lion", Toast.LENGTH_SHORT).show()
+            Toast
+                .makeText(context, "Card lion", Toast.LENGTH_SHORT)
+                .show()
         })
     ) {
         Row(
-            modifier = Modifier
+            modifier = modifier
                 .wrapContentHeight()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(50.dp),
+                modifier = modifier.size(50.dp),
                 shape = CircleShape,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f),
             ) {
                 Image(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = modifier.fillMaxSize(),
                     painter = painterResource(R.drawable.lion),
                     contentDescription = "background_image",
                     contentScale = ContentScale.Crop
                 )
             }
-            Column(modifier = Modifier.padding(start = 8.dp)) {
+            Column(modifier = modifier.padding(start = 8.dp)) {
                 Text(
                     "Alfred Sisley",
                     fontWeight = FontWeight.Bold,
@@ -93,7 +122,7 @@ fun PhotographerCard(context: Context) {
                         "3 minutes ago",
                         style = MaterialTheme.typography.body2,
                         textAlign = TextAlign.End,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = modifier.fillMaxWidth()
                     )
                 }
             }
@@ -103,8 +132,9 @@ fun PhotographerCard(context: Context) {
 }
 
 @Composable
-fun MyButton(context: Context) {
+fun MyButton(modifier: Modifier = Modifier, context: Context) {
     Button(
+        modifier = modifier.padding(end = 16.dp),
         onClick = {
             Toast.makeText(context, "Like button", Toast.LENGTH_SHORT).show()
         },
@@ -114,19 +144,41 @@ fun MyButton(context: Context) {
             end = 20.dp,
             bottom = 12.dp
         ),
-        modifier = Modifier.padding(top = 16.dp)
     ) {
         // Inner content including an icon and a text label
         Icon(
             Icons.Filled.Favorite,
             contentDescription = "Favorite",
-            modifier = Modifier.size(ButtonDefaults.IconSize)
+            modifier = modifier.size(ButtonDefaults.IconSize)
         )
         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
         Text("Like")
     }
+}
 
+@Composable
+fun ExtendedFab() {
+    ExtendedFloatingActionButton(
+        onClick = { /* ... */ },
+        icon = {
+            Icon(
+                Icons.Filled.Call,
+                contentDescription = "Call"
+            )
+        },
+        text = { Text("Call") }
+    )
+}
 
+@Composable
+fun BodyContent(modifier: Modifier = Modifier, context: Context) {
+    Column {
+        PhotographerCard(modifier, context)
+        Row(modifier = modifier.padding(16.dp)) {
+            MyButton(modifier,context)
+            ExtendedFab()
+        }
+    }
 }
 
 @Preview(
