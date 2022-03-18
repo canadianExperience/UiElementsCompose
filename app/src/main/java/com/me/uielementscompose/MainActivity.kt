@@ -15,9 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -136,7 +135,48 @@ fun ScrollingList(context: Context){
     val scrollState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
+    var checkedState by rememberSaveable { mutableStateOf(true) }
+    val switchText = if(checkedState) "Scroll to top" else "Scroll to end"
+
+    checkedState = (scrollState.firstVisibleItemIndex == 0)
+
     Column {
+        
+        Row(verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(8.dp)
+        ){
+            Switch(
+                checked = checkedState,
+                onCheckedChange = { switchOn ->
+                    coroutineScope.launch {
+                        scrollState.animateScrollToItem(
+                            if(switchOn) 0 else (listSize - 1)
+                        )
+                    }
+
+                }
+            )
+            
+            Text(text = switchText)
+
+            IconToggleButton(
+                checked = checkedState,
+                onCheckedChange = { btnOn ->
+                    coroutineScope.launch {
+                        scrollState.animateScrollToItem(
+                            if(btnOn) 0 else (listSize - 1)
+                        )
+                    }
+                }
+            ){
+                Icon(
+                    imageVector = if (checkedState) Icons.Filled.Star else Icons.Filled.StarBorder,
+                    tint = MaterialTheme.colors.primary,
+                    contentDescription = null,
+                )
+            }
+        }
+
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
@@ -221,7 +261,6 @@ fun ImageListItem(context: Context, index: Int) {
     }
 }
 
-
 @Composable
 fun BodyContent(modifier: Modifier = Modifier, context: Context) {
     Column {
@@ -229,6 +268,7 @@ fun BodyContent(modifier: Modifier = Modifier, context: Context) {
             MyButton(context)
             ExtendedFab()
         }
+
         ScrollingList(context)
     }
 }
@@ -236,10 +276,9 @@ fun BodyContent(modifier: Modifier = Modifier, context: Context) {
 @Preview(
     showBackground = true,
     heightDp = 1200,
-    widthDp = 320
-)
+    widthDp = 320)
 @Composable
-fun PhotographerCardPreview() {
+fun MyAppPreview() {
     UiElementsComposeTheme {
         MyApp(context = LocalContext.current)
     }
