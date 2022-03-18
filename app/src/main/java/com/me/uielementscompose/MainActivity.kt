@@ -1,16 +1,18 @@
 package com.me.uielementscompose
 
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -35,30 +37,34 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background,
                 ) {
-
-                    Row(modifier = Modifier.padding(16.dp)) {
-                        PhotographerCard()
-                    }
+                    MyApp(context = LocalContext.current)
                 }
             }
         }
     }
 }
 
+@Composable
+fun MyApp(context: Context) {
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        PhotographerCard(context)
+        MyButton(context)
+    }
+
+}
 
 @Composable
-fun PhotographerCard() {
-    val context = LocalContext.current
-    Card {
+fun PhotographerCard(context: Context) {
+    Card(modifier = Modifier
+        .clip(RoundedCornerShape(4.dp))
+        .clickable(onClick = {
+            Toast.makeText(context, "Card lion", Toast.LENGTH_SHORT).show()
+        })
+    ) {
         Row(
             modifier = Modifier
                 .wrapContentHeight()
-                .clip(RoundedCornerShape(4.dp))
-                .clickable(onClick = {
-                    Toast
-                        .makeText(context, "Clicked", Toast.LENGTH_SHORT)
-                        .show()
-                })
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -93,12 +99,44 @@ fun PhotographerCard() {
             }
         }
     }
+
 }
 
-@Preview(showBackground = true)
+@Composable
+fun MyButton(context: Context) {
+    Button(
+        onClick = {
+            Toast.makeText(context, "Like button", Toast.LENGTH_SHORT).show()
+        },
+        contentPadding = PaddingValues(
+            start = 20.dp,
+            top = 12.dp,
+            end = 20.dp,
+            bottom = 12.dp
+        ),
+        modifier = Modifier.padding(top = 16.dp)
+    ) {
+        // Inner content including an icon and a text label
+        Icon(
+            Icons.Filled.Favorite,
+            contentDescription = "Favorite",
+            modifier = Modifier.size(ButtonDefaults.IconSize)
+        )
+        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+        Text("Like")
+    }
+
+
+}
+
+@Preview(
+    showBackground = true,
+    heightDp = 1200,
+    widthDp = 320
+)
 @Composable
 fun PhotographerCardPreview() {
     UiElementsComposeTheme {
-        PhotographerCard()
+        MyApp(context = LocalContext.current)
     }
 }
