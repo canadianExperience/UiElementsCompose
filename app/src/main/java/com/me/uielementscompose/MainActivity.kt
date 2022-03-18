@@ -8,6 +8,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -15,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,13 +29,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.me.uielementscompose.ui.theme.UiElementsComposeTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             UiElementsComposeTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background,
@@ -52,26 +55,36 @@ fun MyApp(context: Context) {
                 title = {
                     Text(text = "Hi there!")
                 },
+                navigationIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(
+                            Icons.Filled.Menu,
+                            "Menu"
+                        )
+                    }
+                },
                 actions = {
-                    IconButton(onClick = { /* doSomething() */ }) {
-                        Row() {
+                        IconButton(onClick = { /* doSomething() */ }) {
                             Icon(
                                 Icons.Filled.Favorite,
                                 contentDescription = "Favorite",
                                 modifier = Modifier.padding(8.dp)
                             )
+                        }
+                        IconButton(onClick = { /* doSomething() */ }) {
                             Icon(
                                 Icons.Filled.Delete,
                                 contentDescription = "Delete",
                                 modifier = Modifier.padding(8.dp)
                             )
+                        }
+                        IconButton(onClick = { /* doSomething() */ }) {
                             Icon(
                                 Icons.Filled.Search,
                                 contentDescription = "Search",
                                 modifier = Modifier.padding(8.dp)
                             )
                         }
-                    }
                 }
             )
         }
@@ -79,62 +92,10 @@ fun MyApp(context: Context) {
         BodyContent(Modifier.padding(innerPadding), context)
     }
 }
-
 @Composable
-fun PhotographerCard(modifier: Modifier = Modifier, context: Context) {
-    Card(modifier = modifier
-        .padding(16.dp)
-        .clip(RoundedCornerShape(10.dp))
-        .clickable(onClick = {
-            Toast
-                .makeText(context, "Card lion", Toast.LENGTH_SHORT)
-                .show()
-        })
-    ) {
-        Row(
-            modifier = modifier
-                .wrapContentHeight()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = modifier.size(50.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f),
-            ) {
-                Image(
-                    modifier = modifier.fillMaxSize(),
-                    painter = painterResource(R.drawable.lion),
-                    contentDescription = "background_image",
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Column(modifier = modifier.padding(start = 8.dp)) {
-                Text(
-                    "Alfred Sisley",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                // LocalContentAlpha is defining opacity level of its children
-                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium,) {
-                    Text(
-                        "3 minutes ago",
-                        style = MaterialTheme.typography.body2,
-                        textAlign = TextAlign.End,
-                        modifier = modifier.fillMaxWidth()
-                    )
-                }
-            }
-        }
-    }
-
-}
-
-@Composable
-fun MyButton(modifier: Modifier = Modifier, context: Context) {
+fun MyButton(context: Context) {
     Button(
-        modifier = modifier.padding(end = 16.dp),
+        modifier = Modifier.padding(end = 16.dp),
         onClick = {
             Toast.makeText(context, "Like button", Toast.LENGTH_SHORT).show()
         },
@@ -145,11 +106,10 @@ fun MyButton(modifier: Modifier = Modifier, context: Context) {
             bottom = 12.dp
         ),
     ) {
-        // Inner content including an icon and a text label
         Icon(
             Icons.Filled.Favorite,
             contentDescription = "Favorite",
-            modifier = modifier.size(ButtonDefaults.IconSize)
+            modifier = Modifier.size(ButtonDefaults.IconSize)
         )
         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
         Text("Like")
@@ -171,13 +131,105 @@ fun ExtendedFab() {
 }
 
 @Composable
+fun ScrollingList(context: Context){
+    val listSize = 20
+    val scrollState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    Column {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Button(
+                onClick = {
+                coroutineScope.launch {
+                    scrollState.animateScrollToItem(0)
+                }
+            }) {
+                Text("Scroll to top")
+            }
+
+            Button(
+                onClick = {
+                coroutineScope.launch {
+                    scrollState.animateScrollToItem(listSize - 1)
+                }
+            }) {
+                Text("Scroll to end")
+            }
+        }
+
+        LazyColumn(state = scrollState) {
+            items(listSize) { item ->
+                ImageListItem(context, item)
+            }
+        }
+    }
+}
+
+@Composable
+fun ImageListItem(context: Context, index: Int) {
+    Card(modifier = Modifier
+        .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
+        .clip(RoundedCornerShape(10.dp))
+        .clickable(onClick = {
+            Toast
+                .makeText(context, "Item number - $index", Toast.LENGTH_SHORT)
+                .show()
+        })
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .size(50.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f),
+            ) {
+                Image(
+                    modifier = Modifier.fillMaxSize(),
+                    painter = painterResource(R.drawable.lion),
+                    contentDescription = "Image",
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Spacer(Modifier.width(10.dp))
+           // Text("Item #$index", style = MaterialTheme.typography.subtitle1)
+            Column {
+                Text(
+                    "Alfred Sisley",
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                // LocalContentAlpha is defining opacity level of its children
+                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium,) {
+                    Text(
+                        "Item #$index",
+                        style = MaterialTheme.typography.body2,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
 fun BodyContent(modifier: Modifier = Modifier, context: Context) {
     Column {
-        PhotographerCard(modifier, context)
         Row(modifier = modifier.padding(16.dp)) {
-            MyButton(modifier,context)
+            MyButton(context)
             ExtendedFab()
         }
+        ScrollingList(context)
     }
 }
 
