@@ -22,14 +22,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.ImagePainter
+import coil.compose.rememberImagePainter
+import coil.transform.BlurTransformation
+import coil.transform.CircleCropTransformation
+import coil.transform.GrayscaleTransformation
 import com.me.uielementscompose.ui.theme.UiElementsComposeTheme
 import kotlinx.coroutines.launch
 
+@ExperimentalCoilApi
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +52,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@ExperimentalCoilApi
 @Composable
 fun MyApp(context: Context) {
     Scaffold(
@@ -129,6 +136,7 @@ fun ExtendedFab() {
     )
 }
 
+@ExperimentalCoilApi
 @Composable
 fun ScrollingList(context: Context){
     val listSize = 20
@@ -210,6 +218,7 @@ fun ScrollingList(context: Context){
     }
 }
 
+@ExperimentalCoilApi
 @Composable
 fun ImageListItem(context: Context, index: Int) {
     Card(modifier = Modifier
@@ -224,22 +233,8 @@ fun ImageListItem(context: Context, index: Int) {
         Row(verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(8.dp)
         ) {
-            Surface(
-                modifier = Modifier
-                    .size(50.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f),
-            ) {
-                Image(
-                    modifier = Modifier.fillMaxSize(),
-                    painter = painterResource(R.drawable.lion),
-                    contentDescription = "Image",
-                    contentScale = ContentScale.Crop
-                )
-            }
-
+            CoilImage()
             Spacer(Modifier.width(10.dp))
-           // Text("Item #$index", style = MaterialTheme.typography.subtitle1)
             Column {
                 Text(
                     "Alfred Sisley",
@@ -261,6 +256,45 @@ fun ImageListItem(context: Context, index: Int) {
     }
 }
 
+@ExperimentalCoilApi
+@Composable
+fun CoilImage(){
+    Surface(
+        modifier = Modifier
+            .size(50.dp),
+        shape = CircleShape,
+        color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f),
+    ) {
+        val painter = rememberImagePainter(
+            data = "https://cdn.pixabay.com/photo/2017/11/06/15/37/lion-2923947_1280.jpg",
+
+            builder = {
+                placeholder(R.drawable.ic_placeholder)
+                error(R.drawable.ic_error)
+                crossfade(1000)
+                transformations(
+                    GrayscaleTransformation(),
+                    CircleCropTransformation()
+                  //  BlurTransformation(LocalContext.current)
+            )
+            }
+        )
+
+        val painterState = painter.state
+
+        Image(
+            modifier = Modifier.fillMaxSize(),
+            painter = painter,
+            contentDescription = "Logo Image",
+            contentScale = ContentScale.Crop
+        )
+//        if(painterState is ImagePainter.State.Loading){
+//            CircularProgressIndicator()
+//        }
+    }
+}
+
+@ExperimentalCoilApi
 @Composable
 fun BodyContent(modifier: Modifier = Modifier, context: Context) {
     Column {
@@ -273,6 +307,7 @@ fun BodyContent(modifier: Modifier = Modifier, context: Context) {
     }
 }
 
+@ExperimentalCoilApi
 @Preview(
     showBackground = true,
     heightDp = 1200,
